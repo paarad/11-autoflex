@@ -16,6 +16,17 @@ export const metadata: Metadata = {
 	title: "AutoFlex — Fake it ’til you flex it.",
 	description: "Polished “success” posts for LinkedIn, X, and IG. One click. Zero shame.",
 	metadataBase: new URL("https://autoflex.example.com"),
+	openGraph: {
+		title: "AutoFlex — Fake it ’til you flex it.",
+		description: "Polished “success” posts for LinkedIn, X, and IG. One click. Zero shame.",
+		images: [{ url: "/og" }],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "AutoFlex — Fake it ’til you flex it.",
+		description: "Polished “success” posts for LinkedIn, X, and IG. One click. Zero shame.",
+		images: ["/og"],
+	},
 };
 
 export default function RootLayout({
