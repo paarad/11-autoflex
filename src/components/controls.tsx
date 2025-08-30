@@ -125,7 +125,6 @@ export function Controls({ onSubmit, loading }: {
 
 				<div className="flex flex-wrap gap-2">
 					<Button disabled={loading} onClick={() => handleGenerate()}>Generate Flex</Button>
-					<Button disabled={loading} variant="secondary" onClick={() => handleGenerate(3)}>Spice It Up 🔥</Button>
 				</div>
 			</CardContent>
 		</Card>
