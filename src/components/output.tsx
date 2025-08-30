@@ -10,37 +10,19 @@ export type GeneratedPost = {
 	platform: "linkedin" | "x" | "instagram";
 };
 
-export function OutputCard({ post, onRegenerate, onSpice }: {
+export function OutputCard({ post, onRegenerate, onSpice, loading }: {
 	post: GeneratedPost | null;
 	onRegenerate: () => void;
 	onSpice: () => void;
+	loading: boolean;
 }) {
 	const [copied, setCopied] = useState(false);
-	const [loading, setLoading] = useState(false);
 
 	async function handleCopy() {
 		if (!post?.text) return;
 		await navigator.clipboard.writeText(post.text);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 1500);
-	}
-
-	async function handleRegenerate() {
-		setLoading(true);
-		try {
-			await onRegenerate();
-		} finally {
-			setLoading(false);
-		}
-	}
-
-	async function handleSpice() {
-		setLoading(true);
-		try {
-			await onSpice();
-		} finally {
-			setLoading(false);
-		}
 	}
 
 	const shareHref = post?.platform === "x"
@@ -65,8 +47,8 @@ export function OutputCard({ post, onRegenerate, onSpice }: {
 							<Button variant="default">Post on X</Button>
 						</a>
 					) : null}
-					<Button onClick={handleRegenerate} variant="outline" disabled={loading}>Regenerate</Button>
-					<Button onClick={handleSpice} variant="destructive" disabled={loading}>Spice It Up 🔥</Button>
+					<Button onClick={onRegenerate} variant="outline" disabled={loading}>Regenerate</Button>
+					<Button onClick={onSpice} variant="destructive" disabled={loading}>Spice It Up 🔥</Button>
 				</div>
 			</CardContent>
 		</Card>

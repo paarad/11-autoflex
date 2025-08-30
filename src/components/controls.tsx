@@ -20,7 +20,10 @@ export type FormValues = {
 	followers?: string;
 };
 
-export function Controls({ onSubmit }: { onSubmit: (values: FormValues, opts?: { spiceLevel?: number }) => Promise<void> }) {
+export function Controls({ onSubmit, loading }: { 
+	onSubmit: (values: FormValues, opts?: { spiceLevel?: number }) => Promise<void>;
+	loading: boolean;
+}) {
 	const [values, setValues] = useState<FormValues>({
 		platform: "linkedin",
 		tone: "Humblebrag",
@@ -32,19 +35,13 @@ export function Controls({ onSubmit }: { onSubmit: (values: FormValues, opts?: {
 		mrr: "",
 		followers: "",
 	});
-	const [loading, setLoading] = useState(false);
 
 	function update<K extends keyof FormValues>(key: K, val: FormValues[K]) {
 		setValues(v => ({ ...v, [key]: val }));
 	}
 
 	async function handleGenerate(spiceLevel?: number) {
-		setLoading(true);
-		try {
-			await onSubmit(values, { spiceLevel });
-		} finally {
-			setLoading(false);
-		}
+		await onSubmit(values, { spiceLevel });
 	}
 
 	return (

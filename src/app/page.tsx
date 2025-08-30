@@ -9,22 +9,28 @@ export default function Home() {
 	const [current, setCurrent] = useState<GeneratedPost | null>(null);
 	const [history, setHistory] = useState<GeneratedPost[]>([]);
 	const [lastParams, setLastParams] = useState<{ values: FormValues; spiceLevel?: number } | null>(null);
+	const [loading, setLoading] = useState(false);
 
 	async function generate(values: FormValues, opts?: { spiceLevel?: number }) {
-		setLastParams({ values, spiceLevel: opts?.spiceLevel });
-		const res = await fetch("/api/generate", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ ...values, spiceLevel: opts?.spiceLevel ?? 0 }),
-		});
-		if (!res.ok) {
-			const err = await res.json().catch(() => ({}));
-			throw new Error(err.error || "Failed to generate");
+		setLoading(true);
+		try {
+			setLastParams({ values, spiceLevel: opts?.spiceLevel });
+			const res = await fetch("/api/generate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ ...values, spiceLevel: opts?.spiceLevel ?? 0 }),
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.error || "Failed to generate");
+			}
+			const text = await res.text();
+			const post: GeneratedPost = { text, platform: values.platform };
+			setCurrent(post);
+			setHistory((h) => [post, ...h].slice(0, 5));
+		} finally {
+			setLoading(false);
 		}
-		const text = await res.text();
-		const post: GeneratedPost = { text, platform: values.platform };
-		setCurrent(post);
-		setHistory((h) => [post, ...h].slice(0, 5));
 	}
 
 	function handleRegenerate() {
@@ -34,7 +40,9 @@ export default function Home() {
 
 	function handleSpice() {
 		if (!lastParams) return;
-		const nextSpice = Math.min(10, (lastParams.spiceLevel ?? 0) + 2);
+		// Start with base spice level if none exists, then increment
+		const currentSpice = lastParams.spiceLevel ?? 3;
+		const nextSpice = Math.min(10, currentSpice + 2);
 		generate(lastParams.values, { spiceLevel: nextSpice });
 	}
 
@@ -43,13 +51,13 @@ export default function Home() {
 			<Brand />
 
 			<section className="py-10 md:py-12 text-center">
-				<h1 className="text-4xl md:text-5xl font-bold tracking-tight">AutoFlex — Fake it ’til you flex it.</h1>
-				<p className="mt-3 text-muted-foreground max-w-2xl mx-auto">Polished “success” posts for LinkedIn, X, and IG. One click. Zero shame.</p>
+				<h1 className="text-4xl md:text-5xl font-bold tracking-tight">AutoFlex — Fake it 'til you flex it.</h1>
+				<p className="mt-3 text-muted-foreground max-w-2xl mx-auto">Polished "success" posts for LinkedIn, X, and IG. One click. Zero shame.</p>
 			</section>
 
 			<section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-				<Controls onSubmit={generate} />
-				<OutputCard post={current} onRegenerate={handleRegenerate} onSpice={handleSpice} />
+				<Controls onSubmit={generate} loading={loading} />
+				<OutputCard post={current} onRegenerate={handleRegenerate} onSpice={handleSpice} loading={loading} />
 			</section>
 
 			{history.length > 0 ? (
@@ -66,7 +74,7 @@ export default function Home() {
 			) : null}
 
 			<footer className="mt-16 text-center text-xs text-muted-foreground">
-				Satire tool. Don’t build a personality cult, build something cool.
+				Satire tool. Don't build a personality cult, build something cool.
 			</footer>
 		</div>
 	);
