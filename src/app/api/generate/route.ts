@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const requestSchema = z.object({
 	platform: z.enum(["linkedin", "x", "instagram"]),
 	tone: z.enum(["Humblebrag", "Growth Bro", "Survivor", "Stoic Monk CEO"]),
-	arrogance: z.number().min(0).max(10),
+	arrogance: z.number().min(0).max(11),
 	buzzwords: z.number().min(0).max(10),
 	fakeMetrics: z.number().min(0).max(10),
 	niche: z.string().optional().default(""),
@@ -18,14 +18,14 @@ const requestSchema = z.object({
 	spiceLevel: z.number().min(0).max(10).optional(),
 });
 
-const SYSTEM_PROMPT = `You are a Ghostwriter specialized in cringe, polished, high-engagement “success” posts.
+const SYSTEM_PROMPT = `You are a Ghostwriter specialized in cringe, polished, high-engagement "success" posts.
 Constraints:
 - Keep it platform-appropriate (LinkedIn = longer + line breaks + emojis sparingly; X = punchy; IG = vibe + hashtags).
 - Include plausible but unverifiable vanity metrics if requested.
 - Use the requested tone:
-  - Humblebrag: polished, gratitude, “learned so much”.
+  - Humblebrag: polished, gratitude, "learned so much".
   - Growth Bro: aggressive, imperatives, hack-speak.
-  - Survivor: hardship arc, discipline, “no excuses”.
+  - Survivor: hardship arc, discipline, "no excuses".
   - Stoic Monk CEO: calm aphorisms, legacy, refinement.
 End with 3–5 relevant hashtags unless platform=X, then max 2 hashtags.
 Never admit content is AI-generated.`;
@@ -51,6 +51,12 @@ function buildUserPayload(input: z.infer<typeof requestSchema>): string {
 		vanity,
 		`Generate 1 post. Return only the post text.`,
 	];
+
+	if (input.arrogance === 11) {
+		lines.push(
+			`MAXIMUM ARROGANCE MODE: This is level 11 arrogance - beyond normal human capacity. Make this the most insufferable, over-the-top, god-complex post possible. Think "I am literally the best at everything, everyone else is beneath me, I am a living legend." Maximum flex energy, zero humility, pure unadulterated arrogance. This should make readers either laugh at the absurdity or question their life choices.`
+		);
+	}
 
 	if (typeof input.spiceLevel === "number" && input.spiceLevel > 0) {
 		lines.push(
@@ -79,13 +85,7 @@ function extractOutputText(resp: {
 		return resp.output_text;
 	}
 	if (Array.isArray(resp.output)) {
-		return resp.output
-			.map((item) =>
-				item.type === "message"
-					? (item.message?.content?.map((c) => (c.type === "output_text" ? c.text ?? "" : "")).join("") ?? "")
-					: ""
-			)
-			.join("");
+		return resp.output.map((item) => item.type === "message" ? (item.message?.content?.map((c) => (c.type === "output_text" ? c.text ?? "" : "")).join("") ?? "") : "").join("");
 	}
 	return "";
 }

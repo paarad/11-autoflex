@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { AlertTriangle } from "lucide-react";
 
 export type FormValues = {
 	platform: "linkedin" | "x" | "instagram";
@@ -43,6 +44,8 @@ export function Controls({ onSubmit, loading }: {
 	async function handleGenerate(spiceLevel?: number) {
 		await onSubmit(values, { spiceLevel });
 	}
+
+	const isMaxArrogance = values.arrogance === 11;
 
 	return (
 		<Card className="rounded-2xl shadow-sm">
@@ -84,9 +87,24 @@ export function Controls({ onSubmit, loading }: {
 					<div>
 						<div className="flex items-center justify-between">
 							<Label>Arrogance</Label>
-							<span className="text-xs text-muted-foreground">how insufferable? {values.arrogance}</span>
+							<span className={`text-xs ${isMaxArrogance ? 'text-red-600 font-bold' : 'text-muted-foreground'}`}>
+								{isMaxArrogance ? 'MAXIMUM INTENSITY! 🔥' : `how insufferable? ${values.arrogance}`}
+							</span>
 						</div>
-						<Slider value={[values.arrogance]} onValueChange={(v) => update("arrogance", v[0])} min={0} max={10} step={1} />
+						<Slider 
+							value={[values.arrogance]} 
+							onValueChange={(v) => update("arrogance", v[0])} 
+							min={0} 
+							max={11} 
+							step={1} 
+							className={isMaxArrogance ? "opacity-100" : ""}
+						/>
+						{isMaxArrogance && (
+							<div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+								<AlertTriangle className="h-4 w-4 flex-shrink-0" />
+								<span className="font-medium">Warning:</span> You&apos;re about to generate the most insufferable post possible. This is beyond arrogance - this is pure, unadulterated flex energy. Proceed with caution! 🚀
+							</div>
+						)}
 					</div>
 					<div>
 						<div className="flex items-center justify-between">
@@ -124,7 +142,9 @@ export function Controls({ onSubmit, loading }: {
 				</div>
 
 				<div className="flex flex-wrap gap-2">
-					<Button disabled={loading} onClick={() => handleGenerate()}>Generate Flex</Button>
+					<Button disabled={loading} onClick={() => handleGenerate()}>
+						{isMaxArrogance ? "Generate MAXIMUM FLEX 🔥" : "Generate Flex"}
+					</Button>
 				</div>
 			</CardContent>
 		</Card>
